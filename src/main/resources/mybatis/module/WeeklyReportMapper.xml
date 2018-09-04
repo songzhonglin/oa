@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szl.oa.project.module.weeklyReport.mapper.WeeklyReportMapper">
+    
+    <resultMap type="WeeklyReport" id="WeeklyReportResult">
+        <result property="weekId"    column="week_id"    />
+        <result property="workContent"    column="work_content"    />
+        <result property="workStart"    column="work_start"    />
+        <result property="workEnd"    column="work_end"    />
+        <result property="createId"    column="create_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="userId"    column="user_id"    />
+        <result property="status"     column="status"      />
+        <result property="opinion"     column="opinion"      />
+        <association property="user"    column="user_id" javaType="User" resultMap="userResult"/>
+    </resultMap>
+
+    <resultMap id="userResult" type="User">
+        <id     property="userId"       column="user_id"      />
+        <result property="deptId"       column="dept_id"      />
+        <result property="loginName"    column="login_name"   />
+        <result property="userName"     column="user_name"    />
+        <result property="userType"     column="user_type"    />
+        <result property="email"        column="email"        />
+        <result property="phoneNumber"  column="phone_number"  />
+        <result property="birthday"  column="birthday"  />
+        <result property="sex"          column="sex"          />
+        <result property="avatar"       column="avatar"       />
+        <result property="password"     column="password"     />
+        <result property="salt"         column="salt"         />
+        <result property="status"       column="status"       />
+        <result property="delFlag"      column="del_flag"     />
+        <result property="loginIp"      column="login_ip"     />
+        <result property="loginDate"    column="login_date"   />
+        <result property="createBy"     column="create_by"    />
+        <result property="createTime"   column="create_time"  />
+        <result property="updateBy"     column="update_by"    />
+        <result property="updateTime"   column="update_time"  />
+        <result property="remark"       column="remark"       />
+    </resultMap>
+	
+	<sql id="selectWeeklyReportVo">
+        select swr.week_id,swr.user_id,swr.status,swr.opinion,swr.work_content, swr.work_start, swr.work_end, swr.create_id, swr.create_by,
+        swr.create_time, swr.update_by, swr.update_time,swr.remark ,su.user_id,su.user_name,su.dept_id
+        from sys_weekly_report swr left join sys_user su on swr.user_id = su.user_id
+    </sql>
+	
+    <select id="selectWeeklyReportList" parameterType="WeeklyReport" resultMap="WeeklyReportResult">
+        <include refid="selectWeeklyReportVo"/>
+        <where>  
+            <if test="weekId != null and weekId != ''"> and week_id = #{weekId}</if>
+             <if test="workContent != null and workContent != ''">
+                 and swr.work_content   like concat('%', #{workContent}, '%')
+             </if>
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(swr.work_start,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(swr.work_end,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+             <if test="createId != null and createId != ''">
+                 and swr.create_id = #{createId}
+             </if>
+            <if test="createBy != null and createBy != ''">
+                and swr.create_by like concat('%', #{createBy}, '%')
+            </if>
+             <if test="remark != null and remark != ''">
+                 and swr.remark like concat('%', #{remark}, '%')
+             </if>
+            <if test="status != null and status != ''"><!--  -->
+                and swr.status = #{status}
+            </if>
+         </where>
+    </select>
+    
+    <select id="selectWeeklyReportById" parameterType="Long" resultMap="WeeklyReportResult">
+        <include refid="selectWeeklyReportVo"/>
+        where week_id = #{weekId}
+    </select>
+        
+    <insert id="insertWeeklyReport" parameterType="WeeklyReport" useGeneratedKeys="true" keyProperty="weekId">
+        insert into sys_weekly_report
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="weekId != null and weekId != '' ">week_id,</if>
+            <if test="userId != null and userId != '' ">user_id,</if>
+			<if test="workContent != null and workContent != '' ">work_content,</if>
+			<if test="workStart != null and workStart != '' ">work_start,</if>
+			<if test="workEnd != null and workEnd != '' ">work_end,</if>
+			<if test="createId != null and createId != '' ">create_id,</if>
+            <if test="createBy != null and createBy != '' ">create_by,</if>
+			<if test="remark != null and remark != '' ">remark,</if>
+            create_time
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="weekId != null and weekId != ''">#{weekId},</if>
+            <if test="userId != null and userId != ''">#{userId},</if>
+			<if test="workContent != null and workContent != ''">#{workContent},</if>
+			<if test="workStart != null and workStart != ''">#{workStart},</if>
+			<if test="workEnd != null and workEnd != ''">#{workEnd},</if>
+			<if test="createId != null and createId != ''">#{createId},</if>
+			<if test="createBy != null and createBy != ''">#{createBy},</if>
+			<if test="remark != null and remark != ''">#{remark},</if>
+            sysdate()
+         </trim>
+    </insert>
+	 
+    <update id="updateWeeklyReport" parameterType="WeeklyReport">
+        update sys_weekly_report
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null  and userId != ''  ">user_id = #{userId},</if>
+            <if test="status != null  and status != ''  ">status = #{status},</if>
+            <if test="opinion != null and opinion != '' ">opinion=#{opinion},</if>
+            <if test="workContent != null  and workContent != ''  ">work_content = #{workContent},</if>
+            <if test="workStart != null  ">work_start = #{workStart},</if>
+            <if test="workEnd != null  ">work_end = #{workEnd},</if>
+            <if test="updateBy != null  and updateBy != ''  ">update_by = #{updateBy},</if>
+            <if test="remark != null  and remark != ''  ">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where week_id = #{weekId}
+    </update>
+
+	<delete id="deleteWeeklyReportById" parameterType="Long">
+        delete from sys_weekly_report where week_id = #{weekId}
+    </delete>
+	
+    <delete id="deleteWeeklyReportByIds" parameterType="String">
+        delete from sys_weekly_report where week_id in 
+        <foreach item="weekId" collection="array" open="(" separator="," close=")">
+            #{weekId}
+        </foreach>
+    </delete>
+    
+</mapper>

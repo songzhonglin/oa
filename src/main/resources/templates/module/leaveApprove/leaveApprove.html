@@ -1,0 +1,140 @@
+<!DOCTYPE HTML>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<meta charset="utf-8">
+<head th:include="include :: header"></head>
+<body class="gray-bg">
+    <div class="container-div ui-layout-center">
+        <div class="row">
+            <div class="col-sm-12 select-info">
+                <form id="leaveApprove-form">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                提交人：<input type="text" name="createBy"/>
+                            </li>
+                            <li class="select-time">
+                                <label>提交时间： </label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <!--<a class="btn btn-success btn-rounded btn-sm" onclick="$.table.exportExcel()" shiro:hasPermission="module:leaveApprove:export"><i class="fa fa-download"></i>&nbsp;导出</a>-->
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group hidden-xs" id="toolbar" role="group">
+                <a class="btn btn-outline btn-danger btn-rounded" onclick="$.operate.removeAll()" shiro:hasPermission="module:leaveApprove:remove">
+                    <i class="fa fa-trash-o"></i> 删除
+                </a>
+            </div>
+
+            <div class="col-sm-12 select-info table-striped">
+                <table id="bootstrap-table" data-mobile-responsive="true"></table>
+            </div>
+        </div>
+    </div>
+    <div th:include="include :: footer"></div>
+    <script th:inline="javascript">
+        var approveFlag = [[${@permission.hasPermi('module:leaveApprove:approve')}]];
+        var removeFlag = [[${@permission.hasPermi('module:leaveApprove:remove')}]];
+        var datas = [[${@dict.getType('sys_daily_approve')}]];
+        var leaveTypeData = [[${@dict.getType('sys_leave_type')}]];
+        var prefix = ctx + "module/leaveApprove"
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                removeUrl: prefix + "/remove",
+                sortName: "createTime",
+                sortOrder: "desc",
+                modalName: "请假管理",
+                search: false,
+                showExport: false,// 是否支持导出文件
+                showRefresh:false,// 是否显示刷新按钮
+                showColumns :false,// 是否显示隐藏某列下拉框
+                showToggle:false,// 是否显示详细视图和列表视图的切换按钮
+                columns: [{
+		            checkbox: true
+		        },
+				{
+					field : 'approveId', 
+					title : '序号' ,
+                    visible:false
+				},
+                // {
+                //     field : 'leave.leaveTitle',
+                //     title : '请假标题'
+                // },
+                {
+                    field : 'leave.leaveType',
+                    title : '请假类型',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(leaveTypeData, value);
+                    }
+                },
+                {
+                    field : 'leave.leavePeople',
+                    title : '请假人'
+                },
+                {
+                    field : 'leave.beginDate',
+                    title : '请假开始时间'
+                },
+                {
+                    field : 'leave.endDate',
+                    title : '请假结束时间'
+                },
+                {
+                    field : 'leave.dayNum',
+                    title : '请假天数'
+                },
+                {
+                    field: 'dept.deptName',
+                    title : '所属部门'
+                },
+                {
+                    field : 'leave.leaveReason',
+                    title : '请假原因'
+                },
+                {
+                    field : 'leave.leaveStatus',
+                    title : '请假状态' ,
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(datas, value);
+                    }
+                },
+                {
+                    field : 'leave.opinion',
+                    title : '审批意见'
+                },
+                {
+                    field : 'updateTime',
+                    title : '审批时间'
+                },
+		        {
+		            title: '操作',
+		            align: 'center',
+		            formatter: function(value, row, index) {
+		            	var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + approveFlag + '" href="#" onclick="approveLeave(\'' + row.approveId + '\')"><i class="fa fa-gavel"></i>审批</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="#" onclick="$.operate.remove(\'' + row.approveId + '\')"><i class="fa fa-remove"></i>删除</a>');
+						return actions.join('');
+		            }
+		        }]
+            };
+            $.table.init(options);
+        });
+
+        function approveLeave(approveId) {
+            var url = prefix + "/approve/"+approveId;
+            $.modal.open("请假审批", url,'800','360');
+        }
+    </script>
+</body>
+</html>

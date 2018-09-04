@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szl.oa.project.module.employee.mapper.EmployeeMapper">
+    
+    <resultMap type="Employee" id="EmployeeResult">
+        <result property="deptId"    column="dept_id"    />
+        <result property="empId"    column="emp_id"    />
+        <result property="empName"    column="emp_name"    />
+        <result property="empSex"    column="emp_sex"    />
+        <result property="empBirth"    column="emp_birth"    />
+        <result property="empCurrentAddress"    column="emp_current_address"    />
+        <result property="postId"    column="post_id"    />
+        <result property="empTelephone"    column="emp_telephone"    />
+        <result property="empMobilephone"    column="emp_mobilephone"    />
+        <result property="empQq"    column="emp_qq"    />
+        <result property="empEmail"    column="emp_email"    />
+        <result property="empAccount"    column="emp_account"    />
+        <result property="empIdcard"    column="emp_idcard"    />
+        <result property="avatar"    column="avatar"    />
+        <result property="empAddDate"    column="emp_add_date"    />
+        <result property="empAddPerson"    column="emp_add_person"    />
+        <result property="empJob"    column="emp_job"    />
+        <result property="empBank"    column="emp_bank"    />
+        <result property="empNationality"    column="emp_nationality"    />
+        <result property="empOrigin"    column="emp_origin"    />
+        <result property="empNation"    column="emp_nation"    />
+        <result property="empSchool"    column="emp_school"    />
+        <result property="empEducation"    column="emp_education"    />
+        <result property="empProfession"    column="emp_profession"    />
+        <result property="createId"    column="create_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="status"    column="status"    />
+        <result property="empSocialSecurity" column="emp_social_security"    />
+        <result property="empMarriage"    column="emp_marriage"    />
+        <result property="empPolitics"    column="emp_politics"    />
+
+        <result property="openStatus"    column="open_status"    />
+
+        <result property="empLeaveDate"    column="emp_leave_date"    />
+
+        <result property="empOpenDate"    column="emp_open_date"    />
+
+        <result property="empWebchat" column="emp_webchat"/>
+
+        <association property="dept"    column="dept_id" javaType="Dept" resultMap="deptResult"/>
+    </resultMap>
+
+    <resultMap id="deptResult" type="Dept">
+        <id     property="deptId"   column="dept_id"     />
+        <result property="parentId" column="parent_id"   />
+        <result property="deptName" column="dept_name"   />
+        <result property="orderNum" column="order_num"   />
+        <result property="status"   column="dept_status" />
+    </resultMap>
+	
+	<sql id="selectEmployeeVo">
+        select se.dept_id, se.emp_id, se.status,se.emp_social_security,se.emp_marriage,se.emp_politics,se.emp_name,se.emp_webchat,
+        se.emp_sex, se.emp_birth, se.emp_current_address, se.post_id, se.emp_telephone,se.open_status,se.emp_leave_date,se.emp_open_date,
+        se.emp_mobilephone, se.emp_qq, se.emp_email, se.emp_account, se.emp_idcard, se.avatar, se.emp_add_date, se.emp_add_person,
+        se.emp_job, se.emp_bank, se.emp_nationality, se.emp_origin, se.emp_nation, se.emp_school, se.emp_education, se.emp_profession,
+         se.create_id, se.create_by, se.create_time, se.update_by, se.update_time, se.remark,d.dept_id, d.parent_id, d.dept_name, d.order_num, d.status as dept_status
+         from sys_employee se left join sys_dept d on se.dept_id = d.dept_id
+    </sql>
+	
+    <select id="selectEmployeeList" parameterType="Employee" resultMap="EmployeeResult">
+        <include refid="selectEmployeeVo"/>
+        <where>  
+             <if test="empName != null and empName != ''">
+                 and se.emp_name like concat('%', #{empName}, '%')
+             </if>
+            <if test="status != null and status != ''">
+                AND se.status = #{status}
+            </if>
+            <if test="openStatus != null and openStatus != ''">
+                AND se.open_status = #{openStatus}
+            </if>
+
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(se.emp_add_date,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(se.emp_add_date,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+
+             <if test="empSex != null and empSex != ''"> and emp_sex = #{empSex}</if>
+             <if test="empBirth != null and empBirth != ''"> and emp_birth = #{empBirth}</if>
+             <if test="empCurrentAddress != null and empCurrentAddress != ''"> and emp_current_address = #{empCurrentAddress}</if>
+             <if test="postId != null and postId != ''"> and post_id = #{postId}</if>
+             <if test="empTelephone != null and empTelephone != ''"> and emp_telephone = #{empTelephone}</if>
+             <if test="empMobilephone != null and empMobilephone != ''"> and emp_mobilephone = #{empMobilephone}</if>
+             <if test="empQq != null and empQq != ''"> and emp_qq = #{empQq}</if>
+             <if test="empEmail != null and empEmail != ''"> and emp_email = #{empEmail}</if>
+             <if test="empAccount != null and empAccount != ''"> and emp_account = #{empAccount}</if>
+             <if test="empIdcard != null and empIdcard != ''"> and emp_idcard = #{empIdcard}</if>
+             <if test="avatar != null and avatar != ''"> and avatar = #{avatar}</if>
+             <if test="empAddPerson != null and empAddPerson != ''"> and emp_add_person = #{empAddPerson}</if>
+             <if test="empJob != null and empJob != ''"> and emp_job = #{empJob}</if>
+             <if test="empBank != null and empBank != ''"> and emp_bank = #{empBank}</if>
+             <if test="empNationality != null and empNationality != ''"> and emp_nationality = #{empNationality}</if>
+             <if test="empOrigin != null and empOrigin != ''"> and emp_origin = #{empOrigin}</if>
+             <if test="empNation != null and empNation != ''"> and emp_nation = #{empNation}</if>
+             <if test="empSchool != null and empSchool != ''"> and emp_school = #{empSchool}</if>
+             <if test="empEducation != null and empEducation != ''"> and emp_education = #{empEducation}</if>
+             <if test="empProfession != null and empProfession != ''"> and emp_profession = #{empProfession}</if>
+         </where>
+    </select>
+    
+    <select id="selectEmployeeById" parameterType="Long" resultMap="EmployeeResult">
+        <include refid="selectEmployeeVo"/>
+        where emp_id = #{empId}
+    </select>
+        
+    <insert id="insertEmployee" parameterType="Employee" useGeneratedKeys="true" keyProperty="empId">
+        insert into sys_employee
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="deptId != null and deptId != '' ">dept_id,</if>
+			<if test="empId != null and empId != '' ">emp_id,</if>
+			<if test="empName != null and empName != '' ">emp_name,</if>
+			<if test="empSex != null and empSex != '' ">emp_sex,</if>
+			<if test="empBirth != null and empBirth != '' ">emp_birth,</if>
+			<if test="empCurrentAddress != null and empCurrentAddress != '' ">emp_current_address,</if>
+			<if test="postId != null and postId != '' ">post_id,</if>
+			<if test="empTelephone != null and empTelephone != '' ">emp_telephone,</if>
+			<if test="empMobilephone != null and empMobilephone != '' ">emp_mobilephone,</if>
+			<if test="empQq != null and empQq != '' ">emp_qq,</if>
+			<if test="empEmail != null and empEmail != '' ">emp_email,</if>
+			<if test="empAccount != null and empAccount != '' ">emp_account,</if>
+			<if test="empIdcard != null and empIdcard != '' ">emp_idcard,</if>
+			<if test="avatar != null and avatar != '' ">avatar,</if>
+			<if test="empAddDate != null and empAddDate != '' ">emp_add_date,</if>
+			<if test="empAddPerson != null and empAddPerson != '' ">emp_add_person,</if>
+			<if test="empJob != null and empJob != '' ">emp_job,</if>
+			<if test="empBank != null and empBank != '' ">emp_bank,</if>
+			<if test="empNationality != null and empNationality != '' ">emp_nationality,</if>
+			<if test="empOrigin != null and empOrigin != '' ">emp_origin,</if>
+			<if test="empNation != null and empNation != '' ">emp_nation,</if>
+			<if test="empSchool != null and empSchool != '' ">emp_school,</if>
+			<if test="empEducation != null and empEducation != '' ">emp_education,</if>
+			<if test="empProfession != null and empProfession != '' ">emp_profession,</if>
+            <if test="empSocialSecurity != null and empSocialSecurity != '' ">emp_social_security,</if>
+            <if test="empMarriage != null and empMarriage != '' ">emp_marriage,</if>
+            <if test="empPolitics != null and empPolitics != '' ">emp_politics,</if>
+            <if test="openStatus != null and openStatus != '' ">open_status,</if>
+            <if test="empLeaveDate != null and empLeaveDate != '' ">emp_leave_date,</if>
+            <if test="empOpenDate != null and empOpenDate != '' ">emp_open_date,</if>
+            <if test="empWebchat != null and empWebchat != '' ">emp_webchat,</if>
+			<if test="createId != null and createId != '' ">create_id,</if>
+			<if test="createBy != null and createBy != '' ">create_by,</if>
+			<if test="remark != null and remark != '' ">remark,</if>
+            create_time
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="deptId != null and deptId != ''">#{deptId},</if>
+			<if test="empId != null and empId != ''">#{empId},</if>
+			<if test="empName != null and empName != ''">#{empName},</if>
+			<if test="empSex != null and empSex != ''">#{empSex},</if>
+			<if test="empBirth != null and empBirth != ''">#{empBirth},</if>
+			<if test="empCurrentAddress != null and empCurrentAddress != ''">#{empCurrentAddress},</if>
+			<if test="postId != null and postId != ''">#{postId},</if>
+			<if test="empTelephone != null and empTelephone != ''">#{empTelephone},</if>
+			<if test="empMobilephone != null and empMobilephone != ''">#{empMobilephone},</if>
+			<if test="empQq != null and empQq != ''">#{empQq},</if>
+			<if test="empEmail != null and empEmail != ''">#{empEmail},</if>
+			<if test="empAccount != null and empAccount != ''">#{empAccount},</if>
+			<if test="empIdcard != null and empIdcard != ''">#{empIdcard},</if>
+			<if test="avatar != null and avatar != ''">#{avatar},</if>
+			<if test="empAddDate != null and empAddDate != ''">#{empAddDate},</if>
+			<if test="empAddPerson != null and empAddPerson != ''">#{empAddPerson},</if>
+			<if test="empJob != null and empJob != ''">#{empJob},</if>
+			<if test="empBank != null and empBank != ''">#{empBank},</if>
+			<if test="empNationality != null and empNationality != ''">#{empNationality},</if>
+			<if test="empOrigin != null and empOrigin != ''">#{empOrigin},</if>
+			<if test="empNation != null and empNation != ''">#{empNation},</if>
+			<if test="empSchool != null and empSchool != ''">#{empSchool},</if>
+			<if test="empEducation != null and empEducation != ''">#{empEducation},</if>
+			<if test="empProfession != null and empProfession != ''">#{empProfession},</if>
+            <if test="empSocialSecurity != null and empSocialSecurity != '' ">#{empSocialSecurity},</if>
+            <if test="empMarriage != null and empMarriage != '' ">#{empMarriage},</if>
+            <if test="empPolitics != null and empPolitics != '' ">#{empPolitics},</if>
+            <if test="openStatus != null and openStatus != '' ">#{openStatus},</if>
+            <if test="empLeaveDate != null and empLeaveDate != '' ">#{empLeaveDate},</if>
+            <if test="empOpenDate != null and empOpenDate != '' ">#{empOpenDate},</if>
+            <if test="empWebchat != null and empWebchat != '' ">#{empWebchat},</if>
+			<if test="createId != null and createId != ''">#{createId},</if>
+			<if test="createBy != null and createBy != ''">#{createBy},</if>
+			<if test="remark != null and remark != ''">#{remark},</if>
+            sysdate()
+         </trim>
+    </insert>
+	 
+    <update id="updateEmployee" parameterType="Employee">
+        update sys_employee
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="empId != null  ">emp_id = #{empId},</if>
+            <if test="deptId != null  ">dept_id = #{deptId},</if>
+            <if test="empName != null  and empName != ''  ">emp_name = #{empName},</if>
+            <if test="status != null  and status != ''  ">status = #{status},</if>
+            <if test="empSex != null  and empSex != ''  ">emp_sex = #{empSex},</if>
+            <if test="empBirth != null  and empBirth != ''  ">emp_birth = #{empBirth},</if>
+            <if test="empCurrentAddress != null  and empCurrentAddress != ''  ">emp_current_address = #{empCurrentAddress},</if>
+            <if test="postId != null  ">post_id = #{postId},</if>
+            <if test="empTelephone != null  and empTelephone != ''  ">emp_telephone = #{empTelephone},</if>
+            <if test="empMobilephone != null  and empMobilephone != ''  ">emp_mobilephone = #{empMobilephone},</if>
+            <if test="empQq != null  and empQq != ''  ">emp_qq = #{empQq},</if>
+            <if test="empEmail != null  and empEmail != ''  ">emp_email = #{empEmail},</if>
+            <if test="empAccount != null  and empAccount != ''  ">emp_account = #{empAccount},</if>
+            <if test="empIdcard != null  and empIdcard != ''  ">emp_idcard = #{empIdcard},</if>
+            <if test="avatar != null  and avatar != ''  ">avatar = #{avatar},</if>
+            <if test="empAddDate != null and empAddDate != '' ">emp_add_date = #{empAddDate},</if>
+            <if test="empAddPerson != null  and empAddPerson != ''  ">emp_add_person = #{empAddPerson},</if>
+            <if test="empJob != null and empJob != '' ">emp_job = #{empJob},</if>
+            <if test="empBank != null  and empBank != ''  ">emp_bank = #{empBank},</if>
+            <if test="empNationality != null  and empNationality != ''  ">emp_nationality = #{empNationality},</if>
+            <if test="empOrigin != null  and empOrigin != ''">emp_origin = #{empOrigin},</if>
+            <if test="empNation != null  and empNation != ''">emp_nation = #{empNation},</if>
+            <if test="empSchool != null  and empSchool != ''">emp_school = #{empSchool},</if>
+            <if test="empEducation != null  and empEducation != '' ">emp_education = #{empEducation},</if>
+            <if test="empProfession != null  and empProfession != ''  ">emp_profession = #{empProfession},</if>
+            <if test="empSocialSecurity != null and empSocialSecurity != '' ">emp_social_security = #{empSocialSecurity},</if>
+            <if test="empMarriage != null and empMarriage != '' ">emp_marriage = #{empMarriage},</if>
+            <if test="empPolitics != null and empPolitics != '' ">emp_politics = #{empPolitics},</if>
+            <if test="openStatus != null and openStatus != '' ">open_status = #{openStatus},</if>
+            <if test="empLeaveDate != null and empLeaveDate != '' ">emp_leave_date = #{empLeaveDate},</if>
+            <if test="empOpenDate != null and empOpenDate != '' ">emp_open_date = #{empOpenDate},</if>
+            <if test="empWebchat != null and empWebchat != '' ">emp_webchat = #{empWebchat},</if>
+            <if test="createId != null  ">create_id = #{createId},</if>
+            <if test="updateBy != null  and updateBy != ''  ">update_by = #{updateBy},</if>
+            <if test="remark != null  and remark != ''  ">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where emp_id = #{empId}
+    </update>
+
+	<delete id="deleteEmployeeById" parameterType="Long">
+        delete from sys_employee where emp_id = #{empId}
+    </delete>
+	
+    <delete id="deleteEmployeeByIds" parameterType="Long">
+        delete from sys_employee where emp_id in
+        <foreach item="empId" collection="array" open="(" separator="," close=")">
+            #{empId}
+        </foreach>
+    </delete>
+    
+</mapper>

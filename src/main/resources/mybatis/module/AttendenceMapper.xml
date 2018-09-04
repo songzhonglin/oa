@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szl.oa.project.module.attendence.mapper.AttendenceMapper">
+    
+    <resultMap type="Attendence" id="AttendenceResult">
+        <result property="attendId"    column="attend_id"    />
+        <result property="dutyDay"    column="duty_day"    />
+        <result property="createId"    column="create_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="onStatus"    column="on_status"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="offStatus"    column="off_status"    />
+    </resultMap>
+	
+	<sql id="selectAttendenceVo">
+        select attend_id, duty_day, create_id, create_by, create_time, on_status, update_by, update_time, off_status from sys_attendence
+    </sql>
+	
+    <select id="selectAttendenceList" parameterType="Attendence" resultMap="AttendenceResult">
+        <include refid="selectAttendenceVo"/>
+        <where>  
+            <if test="attendId != null and attendId != ''"> and attend_id = #{attendId}</if>
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(duty_day,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(duty_day,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+             <if test="createId != null and createId != ''"> and create_id = #{createId}</if>
+             <if test="createBy != null and createBy != ''"> and create_by = #{createBy}</if>
+             <if test="createTime != null and createTime != ''"> and create_time = #{createTime}</if>
+             <if test="onStatus != null and onStatus != ''"> and on_status = #{onStatus}</if>
+             <if test="updateBy != null and updateBy != ''"> and update_by = #{updateBy}</if>
+             <if test="updateTime != null and updateTime != ''"> and update_time = #{updateTime}</if>
+             <if test="offStatus != null and offStatus != ''"> and off_status = #{offStatus}</if>
+         </where>
+    </select>
+    <select id="selectAttendenceByDutyDay" parameterType="Attendence" resultMap="AttendenceResult">
+        <include refid="selectAttendenceVo"/>
+        where create_id = #{createId} and duty_day = #{dutyDay}
+    </select>
+
+    
+    <select id="selectAttendenceById" parameterType="Long" resultMap="AttendenceResult">
+        <include refid="selectAttendenceVo"/>
+        where attend_id = #{attendId}
+    </select>
+        
+    <insert id="insertAttendence" parameterType="Attendence">
+        insert into sys_attendence
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="attendId != null and attendId != '' ">attend_id,</if>
+			<if test="dutyDay != null and dutyDay != '' ">duty_day,</if>
+			<if test="createId != null and createId != '' ">create_id,</if>
+			<if test="createBy != null and createBy != '' ">create_by,</if>
+			<if test="onStatus != null and onStatus != '' ">on_status,</if>
+            create_time
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="attendId != null and attendId != ''">#{attendId},</if>
+			<if test="dutyDay != null and dutyDay != ''">#{dutyDay},</if>
+			<if test="createId != null and createId != ''">#{createId},</if>
+			<if test="createBy != null and createBy != ''">#{createBy},</if>
+			<if test="onStatus != null and onStatus != ''">#{onStatus},</if>
+            sysdate()
+         </trim>
+    </insert>
+
+    <update id="updateAttend" parameterType="Attendence">
+        update sys_attendence
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="dutyDay != null  and dutyDay != ''  ">duty_day = #{dutyDay},</if>
+            <if test="createId != null  ">create_id = #{createId},</if>
+            <if test="createBy != null  and createBy != ''  ">create_by = #{createBy},</if>
+            <if test="onStatus != null  and onStatus != ''  ">on_status = #{onStatus},</if>
+            create_time = sysdate()
+        </trim>
+        where attend_id = #{attendId}
+    </update>
+
+    <insert id="insertAttend" parameterType="Attendence">
+        insert into sys_attendence
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="attendId != null and attendId != '' ">attend_id,</if>
+            <if test="dutyDay != null and dutyDay != '' ">duty_day,</if>
+            <if test="createId != null and createId != '' ">create_id,</if>
+            <if test="updateBy != null and updateBy != '' ">update_by,</if>
+            <if test="offStatus != null and offStatus != '' ">off_status,</if>
+            update_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="attendId != null and attendId != ''">#{attendId},</if>
+            <if test="dutyDay != null and dutyDay != ''">#{dutyDay},</if>
+            <if test="createId != null and createId != ''">#{createId},</if>
+            <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+            <if test="offStatus != null and offStatus != ''">#{offStatus},</if>
+            sysdate()
+        </trim>
+
+    </insert>
+
+    <update id="updateAttendence" parameterType="Attendence">
+        update sys_attendence
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="dutyDay != null  and dutyDay != ''  ">duty_day = #{dutyDay},</if>
+            <if test="createId != null  ">create_id = #{createId},</if>
+            <if test="updateBy != null  and updateBy != ''  ">update_by = #{updateBy},</if>
+            <if test="offStatus != null  and offStatus != ''  ">off_status = #{offStatus},</if>
+            update_time = sysdate()
+        </trim>
+        where attend_id = #{attendId}
+    </update>
+
+
+	<delete id="deleteAttendenceById" parameterType="Long">
+        delete from sys_attendence where attend_id = #{attendId}
+    </delete>
+	
+    <delete id="deleteAttendenceByIds" parameterType="String">
+        delete from sys_attendence where attend_id in 
+        <foreach item="attendId" collection="array" open="(" separator="," close=")">
+            #{attendId}
+        </foreach>
+    </delete>
+    
+</mapper>

@@ -1,0 +1,535 @@
+<!DOCTYPE HTML>
+<html  lang="zh" xmlns:th="http://www.thymeleaf.org">
+<meta charset="utf-8">
+<head th:include="include :: header"></head>
+<link th:href="@{/ajax/libs/iCheck/custom.css}" rel="stylesheet"/>
+<body class="gray-bg">
+    <div class="ibox float-e-margins">
+        <div class="ibox-content">
+        	<form class="form-horizontal" id="form-employee-add">
+				<input name="deptId"  type="hidden" id="treeId"/>
+
+				<div class="col-sm-6">
+					<!--<div class="form-group">-->
+						<!--<label class="col-sm-4 control-label">员工状态：</label>-->
+						<!--<div class="col-sm-8" th:with="type=${@dict.getType('sys_emp_status')}">-->
+							<!--<div th:each="dict : ${type}" th:class="${dict['cssClass']}">-->
+								<!--<input type="radio" th:id="${dict['dictCode']}" name="status" th:value="${dict['dictValue']}"-->
+									   <!--th:checked="${dict['isDefault'] == 'Y' ? true : false}" onclick="empStatus(this)">-->
+								<!--<label th:for="${dict['dictCode']}" th:text="${dict['dictLabel']}"></label>-->
+							<!--</div>-->
+						<!--</div>-->
+					<!--</div>-->
+
+					<div class="form-group">
+						<label class="col-sm-4 control-label">员工状态：</label>
+						<div class="col-sm-8">
+							<div class="radio-box" th:each="dict : ${@dict.getType('sys_emp_status')}">
+								<input type="radio" th:id="${dict.dictCode}" name="status" th:value="${dict.dictValue}"
+									   th:checked="${dict.isDefault == 'Y' ? true : false}">
+								<label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+
+				<div class="col-sm-6">
+					<!--<div class="form-group">-->
+						<!--<label class="col-sm-4 control-label">账号状态：</label>-->
+						<!--<div class="col-sm-8" th:with="type=${@dict.getType('sys_open_status')}">-->
+							<!--<div th:each="dict : ${type}" th:class="${dict['cssClass']}">-->
+								<!--<input type="radio" th:id="${dict['dictCode']}" name="openStatus" th:value="${dict['dictValue']}"-->
+									   <!--th:checked="${dict['isDefault'] == 'Y' ? true : false}" onclick="openEmpStatus(this)">-->
+								<!--<label th:for="${dict['dictCode']}" th:text="${dict['dictLabel']}"></label>-->
+							<!--</div>-->
+						<!--</div>-->
+					<!--</div>-->
+
+					<div class="form-group">
+						<label class="col-sm-4 control-label">账号状态：</label>
+						<div class="col-sm-8">
+							<div class="radio-box" th:each="dict : ${@dict.getType('sys_open_status')}">
+								<input type="radio" th:id="${dict.dictCode}" name="openStatus" th:value="${dict.dictValue}"
+									   th:checked="${dict.isDefault == 'Y' ? true : false}"/>
+								<label th:for="${dict.dictCode}" th:text="${dict.dictLabel}"></label>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6" id="addDateDiv">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">入职时间：</label>
+						<div class="col-sm-8">
+							<input id="empAddDate" name="empAddDate" class="form-control" type="text" readonly>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6" id="addLeaveDiv">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">离职时间：</label>
+						<div class="col-sm-8">
+							<input id="empLeaveDate" name="empLeaveDate" class="form-control" type="text" readonly>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6" id="openTimeDiv">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">开通时间：</label>
+						<div class="col-sm-8">
+							<input id="empOpenDate" name="empOpenDate" class="form-control" type="text" readonly>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">员工名称：</label>
+						<div class="col-sm-8">
+							<input id="empName" name="empName" class="form-control" type="text">
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">员工账号：</label>
+						<div class="col-sm-8">
+							<input id="empAccount" name="empAccount" class="form-control" type="text">
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">员工性别：</label>
+						<div class="col-sm-8">
+							<select id="empSex" name="empSex"  class="form-control m-b" th:with="type=${@dict.getType('sys_user_sex')}">
+								<option th:each="dict : ${type}" th:text="${dict['dictLabel']}" th:value="${dict['dictValue']}" ></option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">员工岗位：</label>
+						<div class="col-sm-8">
+							<select id="postId" name="postId" class="form-control select2-hidden-accessible">
+								<option th:each="post:${posts}" th:value="${post.postId}" th:text="${post.postName}" th:disabled="${post.status == '1'}"></option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">出生日期：</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" name="empBirth" id="commonDate" readonly>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">员工专业：</label>
+						<div class="col-sm-8">
+							<input id="empProfession" name="empProfession" class="form-control" type="text">
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">身份证号：</label>
+						<div class="col-sm-8">
+							<input id="empIdcard" name="empIdcard" class="form-control" type="text">
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">所属部门：</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" name="deptName" onclick="selectDeptTree()" readonly="true" id="treeName">
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">户籍地址：</label>
+						<div class="col-sm-8">
+							<input id="empOrigin" name="empOrigin" class="form-control" type="text">
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">现居住地址：</label>
+						<div class="col-sm-8">
+							<input id="empCurrentAddress" name="empCurrentAddress" class="form-control" type="text">
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">联系电话：</label>
+						<div class="col-sm-8">
+							<input id="empMobilephone" name="empMobilephone" class="form-control" type="number">
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">QQ：</label>
+						<div class="col-sm-8">
+							<input id="empQq" name="empQq" class="form-control" type="number">
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+
+					<div class="form-group">
+						<label class="col-sm-4 control-label">电子邮件：</label>
+						<div class="col-sm-8">
+							<input id="empEmail" name="empEmail" class="form-control" type="text">
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">微信号：</label>
+						<div class="col-sm-8">
+							<input id="empWebchat" name="empWebchat" class="form-control" type="text">
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">银行卡号：</label>
+						<div class="col-sm-8">
+							<input id="empBank" name="empBank" class="form-control" type="number">
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">社保卡号：</label>
+						<div class="col-sm-8">
+							<input id="empSocialSecurity" name="empSocialSecurity" class="form-control" type="number">
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+
+
+					<div class="form-group">
+						<label class="col-sm-4 control-label">文化程度：</label>
+						<div class="col-sm-8">
+							<!--<input id="empEducation" name="empEducation" class="form-control" type="text">-->
+							<select id="empEducation" name="empEducation" class="form-control m-b" th:with="type=${@dict.getType('sys_education_type')}">
+								<option th:each="dict : ${type}" th:text="${dict['dictLabel']}" th:value="${dict['dictValue']}"
+										th:selected="${dict['isDefault'] == 'Y' ? true : false}" th:disabled="${dict['status'] =='1' ? true :false}">
+								</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-sm-6">
+
+
+					<div class="form-group">
+						<label class="col-sm-4 control-label">学校名称：</label>
+						<div class="col-sm-8">
+							<input id="empSchool" name="empSchool" class="form-control" type="text">
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">国籍：</label>
+						<div class="col-sm-8">
+							<!--<input id="empNationality" name="empNationality" class="form-control" type="text">-->
+							<select id="empNationality" name="empNationality" class="form-control m-b" th:with="type=${@dict.getType('sys_nationality_type')}">
+								<option th:each="dict : ${type}" th:text="${dict['dictLabel']}" th:value="${dict['dictValue']}"
+										th:selected="${dict['isDefault'] == 'Y' ? true : false}" th:disabled="${dict['status'] =='1' ? true :false}">
+								</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">民族：</label>
+						<div class="col-sm-8">
+							<!--<input id="empNation" name="empNation" class="form-control" type="text">-->
+							<select id="empNation" name="empNation" class="form-control m-b" th:with="type=${@dict.getType('sys_nation_type')}">
+								<option th:each="dict : ${type}" th:text="${dict['dictLabel']}" th:value="${dict['dictValue']}"
+										th:selected="${dict['isDefault'] == 'Y' ? true : false}" th:disabled="${dict['status'] =='1' ? true :false}">
+								</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">婚姻状况：</label>
+						<div class="col-sm-8">
+							<!--<input id="empMarriage" name="empMarriage" class="form-control" type="text">-->
+							<select id="empMarriage" name="empMarriage" class="form-control m-b" th:with="type=${@dict.getType('sys_marriage_type')}">
+								<option th:each="dict : ${type}" th:text="${dict['dictLabel']}" th:value="${dict['dictValue']}"
+										th:selected="${dict['isDefault'] == 'Y' ? true : false}" th:disabled="${dict['status'] =='1' ? true :false}">
+								</option>
+							</select>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="form-group">
+						<label class="col-sm-4 control-label">政治面貌：</label>
+						<div class="col-sm-8">
+							<!--<input id="empPolitics" name="empPolitics" class="form-control" type="text">-->
+							<select id="empPolitics" name="empPolitics" class="form-control m-b" th:with="type=${@dict.getType('sys_politics_type')}">
+								<option th:each="dict : ${type}" th:text="${dict['dictLabel']}" th:value="${dict['dictValue']}"
+										th:selected="${dict['isDefault'] == 'Y' ? true : false}" th:disabled="${dict['status'] =='1' ? true :false}">
+								</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+
+
+				<div class="form-group">
+					<div class="form-control-static col-sm-offset-9">
+						<button type="submit" class="btn btn-primary">提交</button>
+						<button onclick="$.modal.close()" class="btn btn-danger" type="button">关闭</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+    <div th:include="include::footer"></div>
+	<script th:src="@{/ajax/libs/iCheck/icheck.min.js}"></script>
+	<script th:src="@{/ajax/libs/select/select2.js}"></script>
+    <script type="text/javascript">
+		var prefix = ctx + "module/employee";
+
+        $(function() {
+            initEmpStatus("0");
+            initEmpOpenStatus("0");
+            $('input').on('ifChecked', function(event){
+                debugger;
+                var val = $(event.target).val();
+                var name = event.target.name;
+                if (name == "status") {
+                    initEmpStatus(val);
+                } else if (name == "openStatus") {
+                    initEmpOpenStatus(val);
+                }
+            });
+        });
+
+		$("#form-employee-add").validate({
+			rules:{
+                empName:{
+					required:true,
+                    maxlength: 20,
+				},
+                empBirth:{
+                    required:true,
+				},
+                empCurrentAddress:{
+                    required:true,
+                    maxlength: 150,
+				},
+                empAccount:{
+                    required:true,
+                    minlength: 2,
+                    maxlength: 20
+                    // remote: {
+                    //     url: prefix + "/checkEmpAccountUnique",
+                    //     type: "post",
+                    //     dataType: "json",
+                    //     data: {
+                    //         name : function() {
+                    //             return $.trim($("#empAccount").val());
+                    //         }
+                    //     },
+                    //     dataFilter: function(data, type) {
+                    //         if (data == "0") return true;
+                    //         else return false;
+                    //     }
+                    // }
+				},
+                empIdcard:{
+                    required:true,
+                    maxlength: 18,
+				},
+                empAddDate:{
+                    required:true,
+                },
+                empProfession:{
+                    required:true,
+                    maxlength: 100,
+				},
+                empOrigin:{
+                    required:true,
+                    maxlength: 150,
+				},
+                empEmail:{
+                    required:true,
+                    email:true,
+                    remote: {
+                        url: prefix + "/checkEmpEmailUnique",
+                        type: "post",
+                        dataType: "json",
+                        data: {
+                            name: function () {
+                                return $.trim($("#empEmail").val());
+                            }
+                        },
+                        dataFilter: function (data, type) {
+                            if (data == "0") return true;
+                            else return false;
+                        }
+                    }
+                },
+                empMobilephone:{
+                    required:true,
+                    isPhone:true,
+                    remote: {
+                        url: prefix + "/checkEmpMobileUnique",
+                        type: "post",
+                        dataType: "json",
+                        data: {
+                            name: function () {
+                                return $.trim($("#phoneNumber").val());
+                            }
+                        },
+                        dataFilter: function (data, type) {
+                            if (data == "0") return true;
+                            else return false;
+                        }
+                    }
+                },
+                empLeaveDate:{
+                    required:true,
+				},
+                empOpenDate:{
+                    required:true,
+				},
+				deptName:{
+                    required:true,
+				}
+
+			},
+            messages: {
+                // "empAccount": {
+                //     remote: "账号已经存在"
+                // },
+                "empEmail": {
+                    remote: "Email已经存在"
+                },
+                "empMobilephone":{
+                    remote: "手机号码已经存在"
+                }
+            },
+			submitHandler: function(form) {
+				$.operate.save(prefix + "/add", $('#form-employee-add').serialize());
+			}
+		});
+        /*用户管理-新增-选择部门树*/
+        function selectDeptTree() {
+            var treeId = $("#treeId").val();
+            var deptId = treeId == null || treeId == "" ? "100" : treeId;
+            var url = ctx + "system/dept/selectDeptTree/" + deptId;
+            $.modal.open("选择部门", url, '380', '380');
+        }
+
+        function initEmpStatus(val) {
+            if(val =='0'){
+                $("#addDateDiv").show()//隐藏div
+                $("#addLeaveDiv").hide(); //显示div
+				$("#empLeaveDate").val("");
+            }else if(val =='1'){
+                $("#addDateDiv").hide();
+                $("#addLeaveDiv").show();
+                $("#empAddDate").val("");
+            }else{
+                $("#addDateDiv").show()//隐藏div
+                $("#addLeaveDiv").hide(); //显示div
+                $("#empLeaveDate").val("");
+            }
+        }
+
+        function initEmpOpenStatus(val) {
+            if(val =='0'){
+                $("#openTimeDiv").attr("disabled",true);
+                // $("#treeName").attr("disabled",true);
+                // $("input[name='deptName']").val("");
+                // $("#postId").attr("disabled",true);
+                $("#empAccount").val("");
+                $("#empAccount").attr("disabled",true);
+                $("#empOpenDate").val("");
+                $("#empOpenDate").attr("disabled",true);
+            }else if(val=='1'){
+                $("#openTimeDiv").attr("disabled",false);
+                // $("#treeName").attr("disabled",false);
+                // $("#postId").attr("disabled",false);
+                $("#empAccount").attr("disabled",false);
+                $("#empOpenDate").attr("disabled",false);
+            }else{
+                $("#openTimeDiv").attr("disabled",true);
+                // $("#treeName").attr("disabled",true);
+                // $("input[name='deptName']").val("");
+                // $("#postId").attr("disabled",true);
+                $("#empAccount").val("");
+                $("#empAccount").attr("disabled",true);
+                $("#empOpenDate").val("");
+                $("#empOpenDate").attr("disabled",true);
+            }
+        }
+
+        function empStatus(obj) {
+            debugger;
+            initEmpStatus(obj.value);
+
+        }
+        function openEmpStatus(obj) {
+            debugger
+            initEmpOpenStatus(obj.value);
+        }
+
+        layui.use('laydate', function() {
+            var laydate = layui.laydate;
+            laydate.render({ elem: '#empAddDate',theme:'molv'});
+        });
+
+        layui.use('laydate', function() {
+            var laydate = layui.laydate;
+            laydate.render({ elem: '#empLeaveDate',theme:'molv'});
+        });
+
+        layui.use('laydate', function() {
+            var laydate = layui.laydate;
+            laydate.render({ elem: '#empOpenDate',theme:'molv'});
+        });
+
+
+	</script>
+</body>
+</html>

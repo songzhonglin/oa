@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szl.oa.project.module.leave.mapper.LeaveMapper">
+    
+    <resultMap type="Leave" id="LeaveResult">
+        <result property="leaveId"    column="leave_id"    />
+        <result property="leaveType"    column="leave_type"    />
+        <result property="leaveTitle"    column="leave_title"    />
+        <result property="leavePeople"    column="leave_people"    />
+        <result property="sex"    column="sex"    />
+        <result property="beginDate"    column="begin_date"    />
+        <result property="endDate"    column="end_date"    />
+        <result property="dayNum"    column="day_num"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="leaveReason"    column="leave_reason"    />
+        <result property="leaveStatus"    column="leave_status"    />
+        <result property="content"    column="content"    />
+        <result property="createId"    column="create_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="userId" column="user_id"/>
+        <result property="opinion" column="opinion" />
+        <association property="dept"    column="dept_id" javaType="Dept" resultMap="deptResult"/>
+        <association property="user"    column="user_id" javaType="User" resultMap="userResult"/>
+    </resultMap>
+
+    <resultMap id="userResult" type="User">
+        <id     property="userId"       column="user_id"      />
+        <result property="deptId"       column="dept_id"      />
+        <result property="loginName"    column="login_name"   />
+        <result property="userName"     column="user_name"    />
+        <result property="userType"     column="user_type"    />
+        <result property="email"        column="email"        />
+        <result property="phoneNumber"  column="phone_number"  />
+        <result property="birthday"  column="birthday"  />
+        <result property="sex"          column="sex"          />
+        <result property="avatar"       column="avatar"       />
+        <result property="password"     column="password"     />
+        <result property="salt"         column="salt"         />
+        <result property="status"       column="status"       />
+        <result property="delFlag"      column="del_flag"     />
+        <result property="loginIp"      column="login_ip"     />
+        <result property="loginDate"    column="login_date"   />
+        <result property="createBy"     column="create_by"    />
+        <result property="createTime"   column="create_time"  />
+        <result property="updateBy"     column="update_by"    />
+        <result property="updateTime"   column="update_time"  />
+        <result property="remark"       column="remark"       />
+    </resultMap>
+
+    <resultMap id="deptResult" type="Dept">
+        <id     property="deptId"   column="dept_id"     />
+        <result property="parentId" column="parent_id"   />
+        <result property="deptName" column="dept_name"   />
+        <result property="leader" column="leader"   />
+        <result property="orderNum" column="order_num"   />
+        <result property="status"   column="dept_status" />
+    </resultMap>
+	
+	<sql id="selectLeaveVo">
+        select l.leave_id, leave_type,l.leave_title, l.leave_people, l.sex, l.begin_date, l.end_date, l.day_num, l.dept_id, l.leave_reason,
+        l.leave_status, l.content, l.create_id, l.create_by, l.create_time, l.update_by, l.update_time, l.remark,
+        l.user_id,l.opinion,d.dept_id, d.parent_id, d.dept_name, d.order_num, d.status as dept_status,d.leader,
+        su.user_id,su.user_name,su.dept_id
+        from sys_leave  l
+         left join sys_dept d on l.dept_id = d.dept_id
+         left join sys_user su on l.user_id = su.user_id
+    </sql>
+
+    <select id="selectLeaveList" parameterType="Leave" resultMap="LeaveResult">
+        <include refid="selectLeaveVo"/>
+        <where>  
+            <if test="leaveType != null and leaveType != ''">
+                and l.leave_type = #{leaveType}
+            </if>
+             <if test="leaveTitle != null and leaveTitle != ''">
+                 and l.leave_title  like concat('%', #{leaveTitle}, '%')
+             </if>
+             <if test="leavePeople != null and leavePeople != ''">
+                 and l.leave_people like concat('%', #{leavePeople}, '%')
+             </if>
+             <if test="sex != null and sex != ''"> and l.sex = #{sex}</if>
+
+            <if test="params.beginTime != null and params.beginTime != '' "><!-- 开始时间检索 -->
+                AND date_format(l.begin_date,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != '' "><!-- 结束时间检索 -->
+                AND date_format(l.end_date,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+
+            <if test="deptId != null and deptId != 0">
+                and (l.dept_id = #{deptId} OR l.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE FIND_IN_SET (#{deptId},ancestors) ))
+            </if>
+             <if test="dayNum != null and dayNum != ''"> and l.day_num = #{dayNum}</if>
+             <if test="leaveReason != null and leaveReason != ''">
+              and l.leave_reason like concat('%', #{leaveReason}, '%')
+             </if>
+             <if test="leaveStatus != null and leaveStatus != ''"> and l.leave_status = #{leaveStatus}</if>
+             <if test="content != null and content != ''">
+                 and l.content like concat('%', #{content}, '%')
+             </if>
+             <if test="createId != null and createId != ''"> and l.create_id = #{createId}</if>
+             <if test="createBy != null and createBy != ''">
+              and l.create_by like concat('%', #{createBy}, '%')
+             </if>
+             <if test="remark != null and remark != ''"> and l.remark = #{remark}</if>
+         </where>
+    </select>
+
+    <select id="queryLeaveList" parameterType="Leave" resultMap="LeaveResult">
+        <include refid="selectLeaveVo"/>
+        <where>
+            <if test="leaveType != null and leaveType != ''">
+                and l.leave_type = #{leaveType}
+            </if>
+            <if test="leaveTitle != null and leaveTitle != ''">
+                and l.leave_title  like concat('%', #{leaveTitle}, '%')
+            </if>
+            <if test="leavePeople != null and leavePeople != ''">
+                and l.leave_people like concat('%', #{leavePeople}, '%')
+            </if>
+            <if test="params.beginTime != null and params.beginTime != '' "><!-- 开始时间检索 -->
+                AND date_format(l.begin_date,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != '' "><!-- 结束时间检索 -->
+                AND date_format(l.end_date,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+            <if test="deptId != null and deptId != 0">
+                and (l.dept_id = #{deptId} OR l.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE FIND_IN_SET (#{deptId},ancestors) ))
+            </if>
+            <if test="leaveStatus != null and leaveStatus != ''"> and l.leave_status = #{leaveStatus}</if>
+            <if test="content != null and content != ''">
+                and l.content like concat('%', #{content}, '%')
+            </if>
+            <if test="createId != null and createId != ''"> and l.create_id != #{createId}</if>
+
+        </where>
+    </select>
+    
+    <select id="selectLeaveById" parameterType="String" resultMap="LeaveResult">
+        <include refid="selectLeaveVo"/>
+        where leave_id = #{leaveId}
+    </select>
+        
+    <insert id="insertLeave" parameterType="Leave" useGeneratedKeys="true" keyProperty="leaveId">
+        insert into sys_leave
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="leaveId != null and leaveId != '' ">leave_id,</if>
+            <if test="userId != null and userId != '' ">user_id,</if>
+            <if test="leaveType != null and leaveType != '' ">leave_type,</if>
+			<if test="leaveTitle != null and leaveTitle != '' ">leave_title,</if>
+			<if test="leavePeople != null and leavePeople != '' ">leave_people,</if>
+			<if test="sex != null and sex != '' ">sex,</if>
+			<if test="beginDate != null and beginDate != '' ">begin_date,</if>
+			<if test="endDate != null and endDate != '' ">end_date,</if>
+			<if test="dayNum != null and dayNum != '' ">day_num,</if>
+			<if test="deptId != null and deptId != '' ">dept_id,</if>
+			<if test="leaveReason != null and leaveReason != '' ">leave_reason,</if>
+			<if test="leaveStatus != null and leaveStatus != '' ">leave_status,</if>
+			<if test="content != null and content != '' ">content,</if>
+			<if test="createId != null and createId != '' ">create_id,</if>
+			<if test="createBy != null and createBy != '' ">create_by,</if>
+			<if test="remark != null and remark != '' ">remark,</if>
+            create_time
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="leaveId != null and leaveId != ''">#{leaveId},</if>
+            <if test="userId != null and userId != ''">#{userId},</if>
+            <if test="leaveType != null and leaveType != '' ">#{leaveType},</if>
+			<if test="leaveTitle != null and leaveTitle != ''">#{leaveTitle},</if>
+			<if test="leavePeople != null and leavePeople != ''">#{leavePeople},</if>
+			<if test="sex != null and sex != ''">#{sex},</if>
+			<if test="beginDate != null and beginDate != ''">#{beginDate},</if>
+			<if test="endDate != null and endDate != ''">#{endDate},</if>
+			<if test="dayNum != null and dayNum != ''">#{dayNum},</if>
+			<if test="deptId != null and deptId != ''">#{deptId},</if>
+			<if test="leaveReason != null and leaveReason != ''">#{leaveReason},</if>
+			<if test="leaveStatus != null and leaveStatus != ''">#{leaveStatus},</if>
+			<if test="content != null and content != ''">#{content},</if>
+			<if test="createId != null and createId != ''">#{createId},</if>
+			<if test="createBy != null and createBy != ''">#{createBy},</if>
+			<if test="remark != null and remark != ''">#{remark},</if>
+            sysdate()
+         </trim>
+    </insert>
+	 
+    <update id="updateLeave" parameterType="Leave">
+        update sys_leave
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null  and userId != ''  ">user_id = #{userId},</if>
+            <if test="leaveStatus != null  and leaveStatus != ''  ">leave_status = #{leaveStatus},</if>
+            <if test="opinion != null and opinion != '' ">opinion=#{opinion},</if>
+            <if test="leaveTitle != null  and leaveTitle != ''  ">leave_title = #{leaveTitle},</if>
+            <if test="leaveType != null and leaveType != '' ">leave_type = #{leaveType},</if>
+            <if test="leavePeople != null  and leavePeople != ''  ">leave_people = #{leavePeople},</if>
+            <if test="sex != null  and sex != ''  ">sex = #{sex},</if>
+            <if test="beginDate != null  ">begin_date = #{beginDate},</if>
+            <if test="endDate != null  ">end_date = #{endDate},</if>
+            <if test="dayNum != null  ">day_num = #{dayNum},</if>
+            <if test="deptId != null  ">dept_id = #{deptId},</if>
+            <if test="leaveReason != null  and leaveReason != ''  ">leave_reason = #{leaveReason},</if>
+            <if test="leaveStatus != null  and leaveStatus != ''  ">leave_status = #{leaveStatus},</if>
+            <if test="content != null  and content != ''  ">content = #{content},</if>
+            <if test="updateBy != null  and updateBy != ''  ">update_by = #{updateBy},</if>
+            <if test="remark != null  and remark != ''  ">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where leave_id = #{leaveId}
+    </update>
+
+	<delete id="deleteLeaveById" parameterType="String">
+        delete from sys_leave where leave_id = #{leaveId}
+    </delete>
+	
+    <delete id="deleteLeaveByIds" parameterType="String">
+        delete from sys_leave where leave_id in 
+        <foreach item="leaveId" collection="array" open="(" separator="," close=")">
+            #{leaveId}
+        </foreach>
+    </delete>
+    
+</mapper>

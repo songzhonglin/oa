@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szl.oa.project.module.daily.mapper.DailyMapper">
+    
+    <resultMap type="Daily" id="DailyResult">
+        <result property="dailyId"    column="daily_id"    />
+        <result property="workContent"    column="work_content"    />
+        <result property="workDate"    column="work_date"    />
+        <result property="workHours"    column="work_hours"    />
+        <result property="workOvertime"    column="work_overtime"    />
+        <result property="overtimeContent"    column="overtime_content"    />
+        <result property="overtimeHours"    column="overtime_hours"    />
+        <result property="createId"    column="create_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="userId"    column="user_id"    />
+        <result property="status"     column="status"      />
+        <result property="opinion"     column="opinion"      />
+        <association property="user"    column="user_id" javaType="User" resultMap="userResult"/>
+    </resultMap>
+
+    <resultMap id="userResult" type="User">
+        <id     property="userId"       column="user_id"      />
+        <result property="deptId"       column="dept_id"      />
+        <result property="loginName"    column="login_name"   />
+        <result property="userName"     column="user_name"    />
+        <result property="userType"     column="user_type"    />
+        <result property="email"        column="email"        />
+        <result property="phoneNumber"  column="phone_number"  />
+        <result property="birthday"  column="birthday"  />
+        <result property="sex"          column="sex"          />
+        <result property="avatar"       column="avatar"       />
+        <result property="password"     column="password"     />
+        <result property="salt"         column="salt"         />
+        <result property="status"       column="status"       />
+        <result property="delFlag"      column="del_flag"     />
+        <result property="loginIp"      column="login_ip"     />
+        <result property="loginDate"    column="login_date"   />
+        <result property="createBy"     column="create_by"    />
+        <result property="createTime"   column="create_time"  />
+        <result property="updateBy"     column="update_by"    />
+        <result property="updateTime"   column="update_time"  />
+        <result property="remark"       column="remark"       />
+    </resultMap>
+	
+	<sql id="selectDailyVo">
+        select sd.daily_id, sd.user_id,sd.status,sd.opinion,sd.work_content, sd.work_date, sd.work_hours, sd.work_overtime, sd.overtime_content,
+        sd.overtime_hours, sd.create_id,sd.create_by, sd.create_time, sd.update_by, sd.update_time, sd.remark,
+        su.user_id,su.user_name,su.dept_id
+         from sys_daily sd left join sys_user su on sd.user_id = su.user_id
+    </sql>
+	
+    <select id="selectDailyList" parameterType="Daily" resultMap="DailyResult">
+        <include refid="selectDailyVo"/>
+        <where>  
+             <if test="workContent != null and workContent != ''">
+                 and sd.work_content like concat('%', #{workContent}, '%')
+             </if>
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(sd.work_date,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(sd.work_date,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+
+            <if test="status != null and status != ''"><!--  -->
+                 and sd.status = #{status}
+            </if>
+             <if test="workHours != null and workHours != ''"> and sd.work_hours = #{workHours}</if>
+             <if test="workOvertime != null and workOvertime != ''"> and sd.work_overtime = #{workOvertime}</if>
+             <if test="overtimeContent != null and overtimeContent != ''">
+                 and sd.overtime_content like concat('%', #{overtimeContent}, '%')
+             </if>
+             <if test="overtimeHours != null and overtimeHours != ''"> and sd.overtime_hours = #{overtimeHours}</if>
+            <if test="createBy != null and createBy != ''">
+                and sd.create_by like concat('%', #{createBy}, '%')
+            </if>
+             <if test="createId != null and createId != ''"> and sd.create_id = #{createId}</if>
+         </where>
+    </select>
+    
+    <select id="selectDailyById" parameterType="Long" resultMap="DailyResult">
+        <include refid="selectDailyVo"/>
+        where daily_id = #{dailyId}
+    </select>
+        
+    <insert id="insertDaily" parameterType="Daily" useGeneratedKeys="true" keyProperty="dailyId">
+        insert into sys_daily
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="dailyId != null and dailyId != '' ">daily_id,</if>
+            <if test="userId != null and userId != '' ">user_id,</if>
+			<if test="workContent != null and workContent != '' ">work_content,</if>
+			<if test="workDate != null and workDate != '' ">work_date,</if>
+			<if test="workHours != null and workHours != '' ">work_hours,</if>
+			<if test="workOvertime != null and workOvertime != '' ">work_overtime,</if>
+			<if test="overtimeContent != null and overtimeContent != '' ">overtime_content,</if>
+			<if test="overtimeHours != null and overtimeHours != '' ">overtime_hours,</if>
+			<if test="createId != null and createId != '' ">create_id,</if>
+			<if test="createBy != null and createBy != '' ">create_by,</if>
+			<if test="remark != null and remark != '' ">remark,</if>
+            create_time
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="dailyId != null and dailyId != ''">#{dailyId},</if>
+            <if test="userId != null and userId != ''">#{userId},</if>
+			<if test="workContent != null and workContent != ''">#{workContent},</if>
+			<if test="workDate != null and workDate != ''">#{workDate},</if>
+			<if test="workHours != null and workHours != ''">#{workHours},</if>
+			<if test="workOvertime != null and workOvertime != ''">#{workOvertime},</if>
+			<if test="overtimeContent != null and overtimeContent != ''">#{overtimeContent},</if>
+			<if test="overtimeHours != null and overtimeHours != ''">#{overtimeHours},</if>
+			<if test="createId != null and createId != ''">#{createId},</if>
+			<if test="createBy != null and createBy != ''">#{createBy},</if>
+			<if test="remark != null and remark != ''">#{remark},</if>
+            sysdate()
+         </trim>
+    </insert>
+	 
+    <update id="updateDaily" parameterType="Daily">
+        update sys_daily
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null  and userId != ''  ">user_id = #{userId},</if>
+            <if test="status != null  and status != ''  ">status = #{status},</if>
+            <if test="opinion != null and opinion != '' ">opinion=#{opinion},</if>
+            <if test="workContent != null  and workContent != ''  ">work_content = #{workContent},</if>
+            <if test="workDate != null  and workDate != ''  ">work_date = #{workDate},</if>
+            <if test="workHours != null  ">work_hours = #{workHours},</if>
+            <if test="workOvertime != null  and workOvertime != ''  ">work_overtime = #{workOvertime},</if>
+            <if test="overtimeContent != null  and overtimeContent != ''  ">overtime_content = #{overtimeContent},</if>
+            <if test="overtimeHours != null  ">overtime_hours = #{overtimeHours},</if>
+            <if test="createId != null  ">create_id = #{createId},</if>
+            <if test="createBy != null  and createBy != ''  ">create_by = #{createBy},</if>
+            <if test="createTime != null  ">create_time = #{createTime},</if>
+            <if test="updateBy != null  and updateBy != ''  ">update_by = #{updateBy},</if>
+            <if test="remark != null  and remark != ''  ">remark = #{remark},</if>
+            update_time = sysdate()
+        </trim>
+        where daily_id = #{dailyId}
+    </update>
+
+	<delete id="deleteDailyById" parameterType="Long">
+        delete from sys_daily where daily_id = #{dailyId}
+    </delete>
+	
+    <delete id="deleteDailyByIds" parameterType="String">
+        delete from sys_daily where daily_id in 
+        <foreach item="dailyId" collection="array" open="(" separator="," close=")">
+            #{dailyId}
+        </foreach>
+    </delete>
+    
+</mapper>

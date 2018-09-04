@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szl.oa.project.module.overtime.mapper.OvertimeMapper">
+    
+    <resultMap type="Overtime" id="OvertimeResult">
+        <result property="overtimeId"    column="overtime_id"    />
+        <result property="workDate"    column="work_date"    />
+        <result property="overtimeContent"    column="overtime_content"    />
+        <result property="overtimeHours"    column="overtime_hours"    />
+        <result property="createId"    column="create_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="userId" column="user_id"/>
+        <result property="status"    column="status"    />
+        <result property="opinion"     column="opinion"      />
+        <association property="dept"    column="dept_id" javaType="Dept" resultMap="deptResult"/>
+        <association property="user"    column="user_id" javaType="User" resultMap="userResult"/>
+    </resultMap>
+
+    <resultMap id="userResult" type="User">
+        <id     property="userId"       column="user_id"      />
+        <result property="deptId"       column="dept_id"      />
+        <result property="loginName"    column="login_name"   />
+        <result property="userName"     column="user_name"    />
+        <result property="userType"     column="user_type"    />
+        <result property="email"        column="email"        />
+        <result property="phoneNumber"  column="phone_number"  />
+        <result property="birthday"  column="birthday"  />
+        <result property="sex"          column="sex"          />
+        <result property="avatar"       column="avatar"       />
+        <result property="password"     column="password"     />
+        <result property="salt"         column="salt"         />
+        <result property="status"       column="status"       />
+        <result property="delFlag"      column="del_flag"     />
+        <result property="loginIp"      column="login_ip"     />
+        <result property="loginDate"    column="login_date"   />
+        <result property="createBy"     column="create_by"    />
+        <result property="createTime"   column="create_time"  />
+        <result property="updateBy"     column="update_by"    />
+        <result property="updateTime"   column="update_time"  />
+        <result property="remark"       column="remark"       />
+    </resultMap>
+
+    <resultMap id="deptResult" type="Dept">
+        <id     property="deptId"   column="dept_id"     />
+        <result property="parentId" column="parent_id"   />
+        <result property="deptName" column="dept_name"   />
+        <result property="leader" column="leader"   />
+        <result property="orderNum" column="order_num"   />
+        <result property="status"   column="dept_status" />
+    </resultMap>
+
+
+    <sql id="selectOvertimeVo">
+        select so.overtime_id, so.work_date, so.overtime_content,so.status,so.opinion, so.overtime_hours, so.create_id, so.create_by, so.create_time,
+         so.update_by, so.update_time, so.remark,d.dept_id, d.parent_id, d.dept_name, d.order_num, d.status as dept_status,d.leader,
+        su.user_id,su.user_name,su.dept_id
+        from sys_overtime so
+        left join sys_dept d on so.dept_id = d.dept_id
+        left join sys_user su on so.user_id = su.user_id
+    </sql>
+	
+    <select id="selectOvertimeList" parameterType="Overtime" resultMap="OvertimeResult">
+        <include refid="selectOvertimeVo"/>
+        <where>  
+            <if test="params.beginTime != null and params.beginTime != '' "><!-- 开始时间检索 -->
+                AND date_format(so.work_date,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != '' "><!-- 结束时间检索 -->
+                AND date_format(so.work_date,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+            </if>
+             <if test="overtimeContent != null and overtimeContent != ''">
+                 and so.overtime_content  like concat('%', #{overtimeContent}, '%')
+             </if>
+             <if test="createBy != null and createBy != ''">
+                 and so.create_by  like concat('%', #{createBy}, '%')
+             </if>
+            <if test="deptId != null and deptId != 0">
+                and (so.dept_id = #{deptId} OR so.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE FIND_IN_SET (#{deptId},ancestors) ))
+            </if>
+
+         </where>
+    </select>
+    
+    <select id="selectOvertimeById" parameterType="Long" resultMap="OvertimeResult">
+        <include refid="selectOvertimeVo"/>
+        where overtime_id = #{overtimeId}
+    </select>
+        
+    <insert id="insertOvertime" parameterType="Overtime" useGeneratedKeys="true" keyProperty="overtimeId">
+        insert into sys_overtime
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="overtimeId != null and overtimeId != '' ">overtime_id,</if>
+			<if test="workDate != null and workDate != '' ">work_date,</if>
+			<if test="overtimeContent != null and overtimeContent != '' ">overtime_content,</if>
+			<if test="overtimeHours != null and overtimeHours != '' ">overtime_hours,</if>
+			<if test="createId != null and createId != '' ">create_id,</if>
+			<if test="createBy != null and createBy != '' ">create_by,</if>
+            <if test="userId != null and userId != '' ">user_id,</if>
+            <if test="deptId != null and deptId != '' ">dept_id,</if>
+            <if test="remark != null and remark != '' ">remark,</if>
+            create_time
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="overtimeId != null and overtimeId != ''">#{overtimeId},</if>
+			<if test="workDate != null and workDate != ''">#{workDate},</if>
+			<if test="overtimeContent != null and overtimeContent != ''">#{overtimeContent},</if>
+			<if test="overtimeHours != null and overtimeHours != ''">#{overtimeHours},</if>
+			<if test="createId != null and createId != ''">#{createId},</if>
+			<if test="createBy != null and createBy != ''">#{createBy},</if>
+            <if test="userId != null and userId != ''">#{userId},</if>
+            <if test="deptId != null and deptId != ''">#{deptId},</if>
+            <if test="remark != null and remark != ''">#{remark},</if>
+            sysdate()
+         </trim>
+    </insert>
+	 
+    <update id="updateOvertime" parameterType="Overtime">
+        update sys_overtime
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="workDate != null  and workDate != ''  ">work_date = #{workDate},</if>
+            <if test="overtimeContent != null  and overtimeContent != ''  ">overtime_content = #{overtimeContent},</if>
+            <if test="overtimeHours != null  ">overtime_hours = #{overtimeHours},</if>
+            <if test="createId != null  ">create_id = #{createId},</if>
+            <if test="updateBy != null  and updateBy != ''  ">update_by = #{updateBy},</if>
+            <if test="remark != null  and remark != ''  ">remark = #{remark},</if>
+            <if test="userId != null and userId != ''">user_id = #{userId},</if>
+            <if test="deptId != null and deptId != ''">dept_id = #{deptId},</if>
+            <if test="status != null  and status != ''  ">status = #{status},</if>
+            <if test="opinion != null and opinion != '' ">opinion=#{opinion},</if>
+            update_time = sysdate()
+        </trim>
+        where overtime_id = #{overtimeId}
+    </update>
+
+	<delete id="deleteOvertimeById" parameterType="Long">
+        delete from sys_overtime where overtime_id = #{overtimeId}
+    </delete>
+	
+    <delete id="deleteOvertimeByIds" parameterType="String">
+        delete from sys_overtime where overtime_id in 
+        <foreach item="overtimeId" collection="array" open="(" separator="," close=")">
+            #{overtimeId}
+        </foreach>
+    </delete>
+    
+</mapper>
